@@ -10,13 +10,14 @@ footer {
 .content {
   display: flex;
   justify-content: space-evenly;
+  text-align: center;
 }
 
 .drop-zone {
   width: 8rem;
   height: 4rem;
   padding: 4rem 2rem;
-  margin: 1rem;
+  margin: 8rem;
   border: 0.2rem solid rgb(0.1, 0.1, 0.1);
   border-radius: 1rem;
   display: flex;
