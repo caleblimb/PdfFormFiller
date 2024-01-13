@@ -1,16 +1,21 @@
 import jspreadsheet, { JspreadsheetInstance, Column } from "jspreadsheet-ce";
 
 export class Spreadsheet {
-  spreadSheet!: JspreadsheetInstance;
-  onFieldMouseDown!: (Element: HTMLElement) => void;
-  onFieldMouseUp!: (Element: HTMLElement) => void;
+  spreadsheet!: JspreadsheetInstance;
+  onCellMouseDown!: (Element: HTMLElement) => void;
+  onCellMouseUp!: (Element: HTMLElement) => void;
+  onStructureChange!: () => void;
   constructor(
     htmlElement: HTMLDivElement,
     file: File | number[],
-    onFieldMouseDown: (element: HTMLElement) => void,
-    onFieldMouseUp: (element: HTMLElement) => void
+    onCellMouseDown: (element: HTMLElement) => void,
+    onCellMouseUp: (element: HTMLElement) => void,
+    onStructureChange: () => void
   ) {
     htmlElement.textContent = "";
+    this.onCellMouseDown = onCellMouseDown;
+    this.onCellMouseUp = onCellMouseUp;
+    this.onStructureChange = onStructureChange;
 
     if (file instanceof File) {
       this.parseFile(htmlElement, file);
@@ -34,12 +39,7 @@ export class Spreadsheet {
       return { type: "text", width: 100 };
     });
 
-    jspreadsheet(htmlElement, {
-      data: data,
-      csvHeaders: false,
-      tableOverflow: false,
-      columns: columns,
-    });
+    this.createSpreadsheet(htmlElement, data, columns);
   }
 
   async parseFile(htmlElement: HTMLDivElement, file: File) {
@@ -50,13 +50,43 @@ export class Spreadsheet {
       return { type: "text", width: 100 };
     });
 
-    this.spreadSheet = jspreadsheet(htmlElement, {
-      data: data,
+    this.createSpreadsheet(htmlElement, data, columns);
+  }
 
+  createSpreadsheet(
+    element: HTMLDivElement,
+    data: string[][],
+    columns: jspreadsheet.Column[]
+  ) {
+    this.spreadsheet = jspreadsheet(element, {
+      data: data,
       csvHeaders: false,
       tableOverflow: false,
-
       columns: columns,
+
+      oninsertrow: this.onStructureChange,
+      oninsertcolumn: this.onStructureChange,
+      ondeleterow: this.onStructureChange,
+      ondeletecolumn: this.onStructureChange,
+      onresizerow: this.onStructureChange,
+      onresizecolumn: this.onStructureChange,
+      onmoverow: this.onStructureChange,
+      onmovecolumn: this.onStructureChange,
+    });
+
+    this.addEvents();
+  }
+
+  addEvents() {
+    const _this = this;
+    const elements = document.querySelectorAll("[data-x][data-y]");
+    (elements as NodeListOf<HTMLElement>).forEach((cell) => {
+      cell.onmousedown = function (ev) {
+        _this.onCellMouseDown(cell);
+      };
+      cell.onmouseup = function (ev) {
+        _this.onCellMouseUp(cell);
+      };
     });
   }
 }

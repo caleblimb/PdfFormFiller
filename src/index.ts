@@ -29,7 +29,10 @@ spreadsheetGenerateForm.addEventListener("submit", (e) => {
     spreadsheetContainer,
     [+spreadhseetWidthInput.value, +spreadhseetHeightInput.value],
     connectionHandler.selectCell,
-    connectionHandler.liftCell
+    connectionHandler.liftCell,
+    () => {
+      connectionHandler.redrawConnections();
+    }
   );
 });
 
@@ -40,7 +43,10 @@ new FileLoader(
       spreadsheetContainer,
       file,
       connectionHandler.selectCell,
-      connectionHandler.liftCell
+      connectionHandler.liftCell,
+      () => {
+        connectionHandler.redrawConnections();
+      }
     );
   },
   "text/csv",
