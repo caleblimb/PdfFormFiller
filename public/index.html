@@ -5,23 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <link rel="stylesheet" href="./static/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="../node_modules/jspreadsheet-ce/dist/jspreadsheet.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Material+Icons"
+    />
     <title>PDF Form Filler</title>
   </head>
 
   <body>
+    <div id="connecting-line" class="connecting-line"></div>
     <header>
       <h1>PDF Form Filler</h1>
     </header>
 
-    <div class="content">
+    <div id="content" class="content">
       <div class="content-column">
         <h2>Spreadsheet</h2>
-        <div id="spreadsheet-dropzone"></div>
+        <div id="spreadsheet-container"></div>
       </div>
 
       <div class="content-column">
         <h2>PDF Form</h2>
-        <div id="pdf-dropzone"></div>
+        <div id="pdf-container"></div>
       </div>
     </div>
 

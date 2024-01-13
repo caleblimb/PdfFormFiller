@@ -1,5 +1,7 @@
 body {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
+  position: relative;
+  margin: 0;
 }
 
 header,
@@ -11,6 +13,7 @@ footer {
   display: flex;
   justify-content: space-evenly;
   text-align: center;
+  overflow: hidden;
 }
 
 .drop-zone {
@@ -36,4 +39,29 @@ footer {
 
 .drop-zone:hover {
   cursor: pointer;
+}
+
+#pdf-container {
+  position: relative;
+}
+
+.field-box {
+  position: absolute;
+  inset: 2px solid red;
+  background-color: rgba(255, 0, 0, 0.2);
+}
+
+.field-box:hover {
+  background-color: rgba(255, 0, 0, 0.5);
+}
+
+.field-box svg {
+  position: absolute;
+  /* border: 2px solid green; */
+  z-index: 100;
+  pointer-events: none;
+  /* width: 100vw; */
+  /* height: 100vh; */
+  overflow: visible;
+  top: 50%;
 }

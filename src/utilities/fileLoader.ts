@@ -1,33 +1,43 @@
 export class FileLoader {
-  htmlElement: HTMLElement;
+  elementContainer: HTMLElement;
 
   constructor(
-    element: HTMLElement,
+    elementContainer: HTMLElement,
     onFileLoad: (file: File) => void,
     contentType: string,
     label: string
   ) {
-    this.htmlElement = element;
+    this.elementContainer = elementContainer;
 
-    this.htmlElement.innerHTML = `
-    <div class="drop-zone">
-        <img src="./assets/document-upload.svg" />
-        <p>${label}</p>
-    </div>
-    `;
+    // this.elementContainer.innerHTML = `
+    // <div class="drop-zone">
+    //     <img src="./assets/document-upload.svg" />
+    //     <p>${label}</p>
+    // </div>
+    // `;
+
+    const dropzoneElement: HTMLDivElement = document.createElement("div");
+    dropzoneElement.className = "drop-zone";
+
+    const imgElement: HTMLImageElement = document.createElement("img");
+    imgElement.src = "./assets/document-upload.svg";
+
+    const pElement: HTMLParagraphElement = document.createElement("p");
+    pElement.textContent = label;
+
+    dropzoneElement.appendChild(imgElement);
+    dropzoneElement.appendChild(pElement);
+
+    this.elementContainer.appendChild(dropzoneElement);
 
     function processFile(file: File) {
       const fileName: string = file.name;
-      console.log(`.name = ${file.name}`);
       if (file.type === contentType) {
         onFileLoad(file);
       }
-      // if (acceptedExtensions.indexOf(fileName.split(".").pop() ?? "") > -1) {
-      //   onFileLoad(file);
-      // }
     }
 
-    this.htmlElement.ondrop = function (ev: any) {
+    dropzoneElement.ondrop = function (ev: any) {
       ev.preventDefault();
 
       if (ev.dataTransfer.items) {
@@ -46,7 +56,7 @@ export class FileLoader {
       }
     };
 
-    this.htmlElement.ondragover = function (ev) {
+    dropzoneElement.ondragover = function (ev) {
       ev.preventDefault();
     };
 
@@ -66,7 +76,7 @@ export class FileLoader {
       });
     }
 
-    this.htmlElement.onclick = async () => {
+    dropzoneElement.onclick = async () => {
       const file = await selectFile();
       processFile(file);
     };
