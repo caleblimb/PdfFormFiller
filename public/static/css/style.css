@@ -16,6 +16,10 @@ footer {
   overflow: hidden;
 }
 
+.spreadsheet-input {
+  width: 4rem;
+}
+
 .drop-zone {
   width: 8rem;
   height: 4rem;
@@ -57,11 +61,13 @@ footer {
 
 .field-box svg {
   position: absolute;
-  /* border: 2px solid green; */
   z-index: 100;
   pointer-events: none;
-  /* width: 100vw; */
-  /* height: 100vh; */
   overflow: visible;
   top: 50%;
+  opacity: 0.1;
+}
+
+.field-box:hover svg {
+  opacity: 1;
 }

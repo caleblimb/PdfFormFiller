@@ -127,7 +127,6 @@ export class Pdf {
     fields: PDFField[],
     pages: HTMLCanvasElement[]
   ): void {
-    // this.pages.forEach();
     fields.forEach((field: PDFField) => {
       const pageNumber = this.getPageNumberOfField(field);
 
@@ -158,8 +157,6 @@ export class Pdf {
 
         container.appendChild(element);
       });
-
-      console.log(pageOffset);
     });
   }
 

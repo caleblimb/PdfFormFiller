@@ -25,11 +25,30 @@
     <div id="content" class="content">
       <div class="content-column">
         <h2>Spreadsheet</h2>
+        <form action="" id="spreadhseet-generate-form">
+          <input
+            id="spreadsheet-width-input"
+            class="spreadsheet-input"
+            type="number"
+            min="1"
+          />
+          X
+          <input
+            id="spreadsheet-height-input"
+            class="spreadsheet-input"
+            type="number"
+            min="1"
+          />
+          <button type="submit">Generate Blank</button>
+        </form>
+        <br />
         <div id="spreadsheet-container"></div>
       </div>
 
       <div class="content-column">
         <h2>PDF Form</h2>
+        <br />
+        <br />
         <div id="pdf-container"></div>
       </div>
     </div>
