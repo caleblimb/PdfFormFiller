@@ -9,13 +9,6 @@ export class FileLoader {
   ) {
     this.elementContainer = elementContainer;
 
-    // this.elementContainer.innerHTML = `
-    // <div class="drop-zone">
-    //     <img src="./assets/document-upload.svg" />
-    //     <p>${label}</p>
-    // </div>
-    // `;
-
     const dropzoneElement: HTMLDivElement = document.createElement("div");
     dropzoneElement.className = "drop-zone";
 

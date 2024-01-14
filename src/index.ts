@@ -28,41 +28,60 @@ spreadsheetGenerateForm.addEventListener("submit", (e) => {
   new Spreadsheet(
     spreadsheetContainer,
     [+spreadhseetWidthInput.value, +spreadhseetHeightInput.value],
-    connectionHandler.selectCell,
     connectionHandler.liftCell,
-    () => {
-      connectionHandler.redrawConnections();
-    }
+    () => connectionHandler.redrawConnections(),
+    () => connectionHandler.focusConnection()
   );
 });
 
-new FileLoader(
-  spreadsheetContainer,
-  (file) => {
-    new Spreadsheet(
-      spreadsheetContainer,
-      file,
-      connectionHandler.selectCell,
-      connectionHandler.liftCell,
-      () => {
-        connectionHandler.redrawConnections();
-      }
-    );
-  },
-  "text/csv",
-  ".csv, .xlsx, .xls"
-);
+function initSpreadsheetFileLoader() {
+  spreadsheetContainer.textContent = "";
+  new FileLoader(
+    spreadsheetContainer,
+    (file) => {
+      new Spreadsheet(
+        spreadsheetContainer,
+        file,
+        connectionHandler.liftCell,
+        () => connectionHandler.redrawConnections(),
+        () => connectionHandler.focusConnection()
+      );
+    },
+    "text/csv",
+    ".csv, .xlsx, .xls"
+  );
+}
 
-new FileLoader(
-  pdfContainer,
-  (file) => {
-    new Pdf(
-      pdfContainer,
-      file,
-      connectionHandler.selectField,
-      connectionHandler.liftField
-    );
-  },
-  "application/pdf",
-  ".pdf"
-);
+let pdf!: Pdf;
+
+function initPdfFileLoader() {
+  pdfContainer.textContent = "";
+  new FileLoader(
+    pdfContainer,
+    (file) => {
+      pdf = new Pdf(pdfContainer, file, connectionHandler.selectField);
+    },
+    "application/pdf",
+    ".pdf"
+  );
+}
+
+document.getElementById("button-reset-spreadsheet")!.onclick = function () {
+  connectionHandler.clearConnections();
+  initSpreadsheetFileLoader();
+};
+document.getElementById("button-autofill-connections")!.onclick =
+  function () {};
+document.getElementById("button-clear-connections")!.onclick = function () {
+  connectionHandler.clearConnections();
+};
+document.getElementById("button-reset-pdf")!.onclick = function () {
+  connectionHandler.clearConnections();
+  initPdfFileLoader();
+};
+document.getElementById("button-download")!.onclick = function () {
+  pdf.downloadDoc(connectionHandler.connections);
+};
+
+initSpreadsheetFileLoader();
+initPdfFileLoader();

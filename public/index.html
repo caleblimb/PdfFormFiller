@@ -4,15 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="./static/css/style.css" />
-    <link
-      rel="stylesheet"
-      href="../node_modules/jspreadsheet-ce/dist/jspreadsheet.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css?family=Material+Icons"
-    />
+    <link rel="stylesheet" href="./static/css/styles.css" />
+    <link rel="stylesheet" href="./static/css/jexcel.css" />
+    <link rel="stylesheet" href="./static/css/jsuites.css" />
+
     <title>PDF Form Filler</title>
   </head>
 
@@ -42,11 +37,24 @@
           <button type="submit">Generate Blank</button>
         </form>
         <br />
+        <button id="button-reset-spreadsheet">Reset Spreadsheet</button>
+        <br />
+        <br />
         <div id="spreadsheet-container"></div>
       </div>
 
       <div class="content-column">
         <h2>PDF Form</h2>
+        <button id="button-autofill-connections" type="button">
+          AutoFill Connections
+        </button>
+        <button id="button-clear-connections" type="button">
+          Clear Connections
+        </button>
+        <button id="button-reset-pdf" type="button">Reset PDF</button>
+        <button id="button-download" type="button">Download</button>
+        <br />
+        <br />
         <br />
         <br />
         <div id="pdf-container"></div>

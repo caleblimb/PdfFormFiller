@@ -5,17 +5,19 @@ export class Spreadsheet {
   onCellMouseDown!: (Element: HTMLElement) => void;
   onCellMouseUp!: (Element: HTMLElement) => void;
   onStructureChange!: () => void;
+  onFocusChange!: () => void;
+
   constructor(
     htmlElement: HTMLDivElement,
     file: File | number[],
-    onCellMouseDown: (element: HTMLElement) => void,
-    onCellMouseUp: (element: HTMLElement) => void,
-    onStructureChange: () => void
+    onCellMouseUp: (cell: HTMLElement) => void,
+    onStructureChange: () => void,
+    onFocusChange: () => void
   ) {
     htmlElement.textContent = "";
-    this.onCellMouseDown = onCellMouseDown;
     this.onCellMouseUp = onCellMouseUp;
     this.onStructureChange = onStructureChange;
+    this.onFocusChange = onFocusChange;
 
     if (file instanceof File) {
       this.parseFile(htmlElement, file);
@@ -28,9 +30,11 @@ export class Spreadsheet {
     let data: string[][] = [];
 
     let row: string[] = [];
+
     for (let i = 0; i < dimensions[0]; i++) {
       row.push("");
     }
+
     for (let i = 0; i < dimensions[1]; i++) {
       data.push([...row]);
     }
@@ -72,6 +76,8 @@ export class Spreadsheet {
       onresizecolumn: this.onStructureChange,
       onmoverow: this.onStructureChange,
       onmovecolumn: this.onStructureChange,
+      onselection: this.onFocusChange,
+      onblur: this.onFocusChange,
     });
 
     this.addEvents();
@@ -80,11 +86,9 @@ export class Spreadsheet {
   addEvents() {
     const _this = this;
     const elements = document.querySelectorAll("[data-x][data-y]");
+
     (elements as NodeListOf<HTMLElement>).forEach((cell) => {
-      cell.onmousedown = function (ev) {
-        _this.onCellMouseDown(cell);
-      };
-      cell.onmouseup = function (ev) {
+      cell.onmouseup = function (_ev) {
         _this.onCellMouseUp(cell);
       };
     });

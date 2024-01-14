@@ -51,12 +51,13 @@ footer {
 
 .field-box {
   position: absolute;
-  inset: 2px solid red;
-  background-color: rgba(255, 0, 0, 0.2);
+  background-color: rgba(255, 0, 0, 0.1);
 }
 
-.field-box:hover {
+.field-box:hover,
+.field-box.focused-field {
   background-color: rgba(255, 0, 0, 0.5);
+  cursor: pointer;
 }
 
 .field-box svg {
@@ -68,6 +69,11 @@ footer {
   opacity: 0.1;
 }
 
-.field-box:hover svg {
+.field-box:hover svg,
+.field-box.focused-field svg {
   opacity: 1;
+}
+
+.jcontextmenu > div:last-child {
+  display: none;
 }

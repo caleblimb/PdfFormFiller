@@ -1,3 +1,4 @@
+import download from "downloadjs";
 import {
   PDFCheckBox,
   PDFDocument,
@@ -17,36 +18,25 @@ import {
   getDocument,
 } from "pdfjs-dist";
 import { RenderParameters } from "pdfjs-dist/types/src/display/api";
-
-enum FieldType {
-  TEXT = "Text Field",
-  CHECKBOX = "Checkbox",
-  DROPDOWN = "Dropdown",
-  RADIOGROUP = "Radio Group",
-  SIGNATURE = "Signature",
-}
+import { Connection, FormField } from "../utilities/ConnectionHandler";
 
 export class Pdf {
   pdfDoc!: PDFDocument;
   pages!: PDFPage[];
-  form!: PDFForm;
   formFields!: PDFField[];
   canvas!: HTMLCanvasElement;
   context!: CanvasRenderingContext2D;
-  onFieldMouseDown!: (Element: HTMLElement) => void;
-  onFieldMouseUp!: (Element: HTMLElement) => void;
+  onFieldMouseDown!: (field: FormField) => void;
 
   constructor(
     container: HTMLElement,
     file: File,
-    onFieldMouseDown: (element: HTMLElement) => void,
-    onFieldMouseUp: (element: HTMLElement) => void
+    onFieldMouseDown: (field: FormField) => void
   ) {
     container.textContent = "";
     this.canvas = document.createElement("canvas");
     this.context = this.canvas.getContext("2d")!;
     this.onFieldMouseDown = onFieldMouseDown;
-    this.onFieldMouseUp = onFieldMouseUp;
 
     container.appendChild(this.canvas);
 
@@ -74,8 +64,8 @@ export class Pdf {
   async parsePdf(pdfBytes: ArrayBuffer): Promise<void> {
     this.pdfDoc = await PDFDocument.load(pdfBytes);
     this.pages = this.pdfDoc.getPages();
-    this.form = this.pdfDoc.getForm();
-    this.formFields = this.form.getFields();
+    const form = this.pdfDoc.getForm();
+    this.formFields = form.getFields();
   }
 
   async rasterizePdf(pdfBytes: ArrayBuffer): Promise<HTMLCanvasElement[]> {
@@ -103,8 +93,8 @@ export class Pdf {
     return rasterizedPages;
   }
 
-  drawPages(canvas: HTMLCanvasElement, pages: HTMLCanvasElement[]) {
-    const canvasDimensions = pages.reduce(
+  drawPages(canvas: HTMLCanvasElement, rasterizedPages: HTMLCanvasElement[]) {
+    const canvasDimensions = rasterizedPages.reduce(
       (acc, page) => [Math.max(acc[0], page.width), acc[1] + page.height],
       [0, 0]
     );
@@ -112,7 +102,7 @@ export class Pdf {
     canvas.width = canvasDimensions[0];
     canvas.height = canvasDimensions[1];
 
-    pages.reduce((acc, page) => {
+    rasterizedPages.reduce((acc, page) => {
       const dWidth: number = page.width;
       const dHeight: number = page.height;
       const dx: number = 0;
@@ -125,12 +115,12 @@ export class Pdf {
   addFormFieldComponents(
     container: HTMLElement,
     fields: PDFField[],
-    pages: HTMLCanvasElement[]
+    rasterizedPages: HTMLCanvasElement[]
   ): void {
     fields.forEach((field: PDFField) => {
       const pageNumber = this.getPageNumberOfField(field);
 
-      const pageOffset = pages.reduce(
+      const pageOffset = rasterizedPages.reduce(
         (acc, page, index) => (index > pageNumber ? acc + page.height : acc),
         0
       );
@@ -148,11 +138,7 @@ export class Pdf {
 
         element.onmousedown = (ev) => {
           ev.preventDefault();
-          this.onFieldMouseDown(element);
-        };
-        element.onmouseup = (ev) => {
-          ev.preventDefault();
-          this.onFieldMouseUp(element);
+          this.onFieldMouseDown({ container: element, field: field });
         };
 
         container.appendChild(element);
@@ -169,18 +155,31 @@ export class Pdf {
     return pageNumber;
   }
 
-  getFormFieldType(field: PDFField): FieldType | null {
-    if (field instanceof PDFTextField) {
-      return FieldType.TEXT;
-    } else if (field instanceof PDFCheckBox) {
-      return FieldType.CHECKBOX;
-    } else if (field instanceof PDFDropdown) {
-      return FieldType.DROPDOWN;
-    } else if (field instanceof PDFRadioGroup) {
-      return FieldType.RADIOGROUP;
-    } else if (field instanceof PDFSignature) {
-      return FieldType.SIGNATURE;
-    }
-    return null;
+  async fillDocument(connections: Set<Connection>): Promise<Uint8Array> {
+    connections.forEach((connection) => {
+      if (connection.field.field instanceof PDFTextField) {
+        (connection.field.field as PDFTextField).setText(
+          connection.cell.innerText
+        );
+      } else if (connection.field.field instanceof PDFCheckBox) {
+        if (connection.cell.innerText === "true") {
+          (connection.field.field as PDFCheckBox).check();
+        }
+      } else if (connection.field.field instanceof PDFDropdown) {
+        //TODO: Handle dropdown field type
+      } else if (connection.field.field instanceof PDFRadioGroup) {
+        //TODO: Handle radio group field type
+      } else if (connection.field.field instanceof PDFSignature) {
+        //TODO: Handle signature field type
+      }
+    });
+
+    const pdfBytes = await this.pdfDoc.save();
+    return pdfBytes;
+  }
+
+  async downloadDoc(connections: Set<Connection>) {
+    const doc = await this.fillDocument(connections);
+    download(doc, "pdf-tax-example.pdf", "application/pdf");
   }
 }
