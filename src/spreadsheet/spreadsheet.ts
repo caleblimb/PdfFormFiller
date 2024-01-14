@@ -1,17 +1,16 @@
-import jspreadsheet, { JspreadsheetInstance, Column } from "jspreadsheet-ce";
+import jspreadsheet, { Column } from "jspreadsheet-ce";
 
 export class Spreadsheet {
-  private spreadsheet!: JspreadsheetInstance;
   private onCellMouseUp!: (Element: HTMLElement) => void;
   private onStructureChange!: () => void;
-  private onFocusChange!: () => void;
+  private onFocusChange!: (position: { x: number; y: number } | null) => void;
 
   constructor(
     htmlElement: HTMLDivElement,
-    file: File | number[],
+    file: File | { width: number; height: number },
     onCellMouseUp: (cell: HTMLElement) => void,
     onStructureChange: () => void,
-    onFocusChange: () => void
+    onFocusChange: (position: { x: number; y: number } | null) => void
   ) {
     htmlElement.textContent = "";
     this.onCellMouseUp = onCellMouseUp;
@@ -25,16 +24,18 @@ export class Spreadsheet {
     }
   }
 
-  private generateTable(htmlElement: HTMLDivElement, dimensions: number[]) {
+  private generateTable(
+    htmlElement: HTMLDivElement,
+    dimensions: { width: number; height: number }
+  ) {
     let data: string[][] = [];
-
     let row: string[] = [];
 
-    for (let i = 0; i < dimensions[0]; i++) {
+    for (let i = 0; i < dimensions.width; i++) {
       row.push("");
     }
 
-    for (let i = 0; i < dimensions[1]; i++) {
+    for (let i = 0; i < dimensions.height; i++) {
       data.push([...row]);
     }
 
@@ -61,7 +62,7 @@ export class Spreadsheet {
     data: string[][],
     columns: jspreadsheet.Column[]
   ) {
-    this.spreadsheet = jspreadsheet(element, {
+    jspreadsheet(element, {
       data: data,
       csvHeaders: false,
       tableOverflow: false,
@@ -75,8 +76,18 @@ export class Spreadsheet {
       onresizecolumn: this.onStructureChange,
       onmoverow: this.onStructureChange,
       onmovecolumn: this.onStructureChange,
-      onselection: this.onFocusChange, //TODO save selection corners
-      onblur: this.onFocusChange,
+      onselection: (
+        _element,
+        borderLeftIndex,
+        borderTopIndex,
+        _borderRightIndex,
+        _borderBottomIndex
+      ) => {
+        this.onFocusChange({ x: borderLeftIndex, y: borderTopIndex });
+      }, //TODO save selection corners
+      onblur: () => {
+        this.onFocusChange(null);
+      },
     });
 
     this.addEvents();

@@ -1,8 +1,9 @@
 import download from "downloadjs";
 import { PDFField } from "pdf-lib";
 import { Pdf } from "../pdf/Pdf";
+import { getPageCoorinates } from "./Position";
 
-const svgNS = "http://www.w3.org/2000/svg";
+const SVG_NS = "http://www.w3.org/2000/svg";
 
 export interface FormField {
   container: HTMLElement;
@@ -21,9 +22,9 @@ interface SavedConnection {
 }
 
 export class ConnectionHandler {
-  connections: Set<Connection> = new Set();
-  selectedField: FormField | null = null;
-  activeLine: SVGLineElement | null = null;
+  private connections: Set<Connection> = new Set();
+  private selectedField: FormField | null = null;
+  private activeLine: SVGLineElement | null = null;
 
   constructor() {
     const _this = this;
@@ -35,64 +36,15 @@ export class ConnectionHandler {
     });
   }
 
-  getPageCoorinates(element: HTMLElement) {
-    const rect = element.getBoundingClientRect();
-    const pageX = rect.left + rect.width / 2 + window.scrollX;
-    const pageY = rect.top + rect.height / 2 + window.scrollY;
-    const pageRight = rect.right + window.scrollX;
-    const pageLeft = rect.left + window.scrollX;
-    const pageTop = rect.top + window.scrollY;
-    const width = rect.width;
-    const height = rect.height;
-    return {
-      x: pageX,
-      y: pageY,
-      right: pageRight,
-      top: pageTop,
-      left: pageLeft,
-      width: width,
-      height: height,
-    };
-  }
-
-  liftCell = (cell: HTMLElement) => {
-    if (this.selectedField !== null) {
-      this.addConnection({ field: this.selectedField, cell: cell });
-      this.selectedField = null;
-    }
-  };
-
-  selectField = (field: FormField) => {
-    if (this.selectedField !== null) {
-      this.selectedField.container.textContent = "";
-    }
-    this.removeConnection(field);
-    this.selectedField = field;
-
-    const svg = document.createElementNS(svgNS, "svg");
-
-    this.activeLine = document.createElementNS(svgNS, "line");
-
-    this.activeLine.setAttributeNS(null, "x2", "0");
-    this.activeLine.setAttributeNS(null, "y2", "0");
-    this.activeLine.setAttributeNS(null, "x1", "0");
-    this.activeLine.setAttributeNS(null, "y1", "0");
-    this.activeLine.setAttributeNS(null, "stroke-width", "2");
-    this.activeLine.setAttributeNS(null, "stroke", "red");
-    svg.appendChild(this.activeLine);
-
-    this.selectedField.container.appendChild(svg);
-  };
-
-  mouseMove(ev: MouseEvent) {
+  private mouseMove(ev: MouseEvent) {
     if (this.activeLine !== null && this.selectedField !== null) {
-      const pos = this.getPageCoorinates(this.selectedField.container!);
+      const pos = getPageCoorinates(this.selectedField.container!);
       this.activeLine.setAttributeNS(null, "x1", `${ev.pageX - pos.x}`);
       this.activeLine.setAttributeNS(null, "y1", `${ev.pageY - pos.y}`);
     }
   }
 
-  mouseUp(ev: MouseEvent) {
+  private mouseUp(ev: MouseEvent) {
     if (
       this.selectedField !== null &&
       this.selectedField.container !==
@@ -105,7 +57,7 @@ export class ConnectionHandler {
     }
   }
 
-  removeConnection(field: FormField) {
+  private removeConnection(field: FormField) {
     this.connections.forEach((connection) => {
       if (field.container === connection.field.container) {
         field.container.textContent = "";
@@ -114,28 +66,21 @@ export class ConnectionHandler {
     });
   }
 
-  clearConnections() {
-    this.connections.forEach((connection) => {
-      connection.field.container.textContent = "";
-    });
-    this.connections.clear();
-  }
-
-  addConnection(connection: Connection) {
+  private addConnection(connection: Connection) {
     this.removeConnection(connection.field);
     this.connections.add(connection);
     this.drawConnection(connection);
   }
 
-  drawConnection(connection: Connection) {
+  private drawConnection(connection: Connection) {
     connection.field.container.textContent = "";
 
-    const coords = this.getPageCoorinates(connection.cell);
-    const pos = this.getPageCoorinates(connection.field.container);
+    const coords = getPageCoorinates(connection.cell);
+    const pos = getPageCoorinates(connection.field.container);
 
-    const svg = document.createElementNS(svgNS, "svg");
+    const svg = document.createElementNS(SVG_NS, "svg");
 
-    const line = document.createElementNS(svgNS, "line");
+    const line = document.createElementNS(SVG_NS, "line");
     line.setAttributeNS(null, "x2", "0");
     line.setAttributeNS(null, "y2", "0");
     line.setAttributeNS(null, "x1", `${coords.right - pos.x}`);
@@ -144,7 +89,7 @@ export class ConnectionHandler {
     line.setAttributeNS(null, "stroke", "red");
     svg.appendChild(line);
 
-    const box = document.createElementNS(svgNS, "rect");
+    const box = document.createElementNS(SVG_NS, "rect");
     box.setAttributeNS(null, "x", `${coords.left - pos.x}`);
     box.setAttributeNS(null, "y", `${coords.top - pos.y}`);
     box.setAttributeNS(null, "width", `${coords.width}`);
@@ -157,7 +102,64 @@ export class ConnectionHandler {
     connection.field.container.appendChild(svg);
   }
 
-  redrawConnections() {
+  private parseConnection(connection: SavedConnection, pdf: Pdf) {
+    const container: HTMLElement | null = document.querySelector(
+      `[data-i="${connection.dataI}"]`
+    );
+    const cell: HTMLElement | null = document.querySelector(
+      `[data-x="${connection.dataX}"][data-y="${connection.dataY}"]`
+    );
+    const field = pdf.getFormField(+connection.dataI);
+
+    if (container && field && cell) {
+      this.addConnection({
+        field: { container: container, field: field },
+        cell: cell,
+      });
+    }
+  }
+
+  public liftCell = (cell: HTMLElement) => {
+    if (this.selectedField !== null) {
+      this.addConnection({ field: this.selectedField, cell: cell });
+      this.selectedField = null;
+    }
+  };
+
+  public selectField = (field: FormField) => {
+    if (this.selectedField !== null) {
+      this.selectedField.container.textContent = "";
+    }
+    this.removeConnection(field);
+    this.selectedField = field;
+
+    const svg = document.createElementNS(SVG_NS, "svg");
+
+    this.activeLine = document.createElementNS(SVG_NS, "line");
+
+    this.activeLine.setAttributeNS(null, "x2", "0");
+    this.activeLine.setAttributeNS(null, "y2", "0");
+    this.activeLine.setAttributeNS(null, "x1", "0");
+    this.activeLine.setAttributeNS(null, "y1", "0");
+    this.activeLine.setAttributeNS(null, "stroke-width", "2");
+    this.activeLine.setAttributeNS(null, "stroke", "red");
+    svg.appendChild(this.activeLine);
+
+    this.selectedField.container.appendChild(svg);
+  };
+
+  public getConnections(): Set<Connection> {
+    return this.connections;
+  }
+
+  public clearConnections() {
+    this.connections.forEach((connection) => {
+      connection.field.container.textContent = "";
+    });
+    this.connections.clear();
+  }
+
+  public redrawConnections() {
     this.connections.forEach((connection) => {
       connection.cell.style.backgroundColor = "";
       connection.field.container.textContent = "";
@@ -166,7 +168,7 @@ export class ConnectionHandler {
     });
   }
 
-  focusConnection() {
+  public focusConnection() {
     const focusedFields = document.querySelectorAll(".focused-field");
     focusedFields.forEach((element) => {
       element.classList.remove("focused-field");
@@ -182,7 +184,7 @@ export class ConnectionHandler {
     });
   }
 
-  saveConnections() {
+  public saveConnections() {
     let data: SavedConnection[] = [];
     this.connections.forEach((connection) => {
       const dataX = connection.cell.dataset.x;
@@ -194,12 +196,10 @@ export class ConnectionHandler {
     });
 
     const json = JSON.stringify(data);
-    console.log(json);
-
     download(json, "connections.json", "application/json");
   }
 
-  autoFillConnections(pdf: Pdf, position: { x: number; y: number }) {
+  public autoFillConnections(pdf: Pdf, position: { x: number; y: number }) {
     const fieldCount: number = pdf.getFormFieldCount();
     for (let i = 0; i < fieldCount; i++) {
       this.parseConnection(
@@ -209,25 +209,7 @@ export class ConnectionHandler {
     }
   }
 
-  parseConnection(connection: SavedConnection, pdf: Pdf) {
-    const container: HTMLElement | null = document.querySelector(
-      `[data-i="${connection.dataI}"]`
-    );
-    const cell: HTMLElement | null = document.querySelector(
-      `[data-x="${connection.dataX}"][data-y="${connection.dataY}"]`
-    );
-    const field = pdf.getFormField(+connection.dataI);
-
-    console.log(container, field, cell);
-    if (container && field && cell) {
-      this.addConnection({
-        field: { container: container, field: field },
-        cell: cell,
-      });
-    }
-  }
-
-  loadConnections(file: File, pdf: Pdf) {
+  public loadConnections(file: File, pdf: Pdf) {
     const reader = new FileReader();
 
     reader.onload = (event) => {

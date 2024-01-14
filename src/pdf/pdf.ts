@@ -18,14 +18,15 @@ import {
   PageViewport,
   getDocument,
 } from "pdfjs-dist";
-import { RenderParameters } from "pdfjs-dist/types/src/display/api";
 import { Connection, FormField } from "../utilities/ConnectionHandler";
 
+const GLOBAL_WORKER_OPTIONS_SRC: string =
+  "../../node_modules/pdfjs-dist/build/pdf.worker.min.mjs";
 export class Pdf {
-  pdfDoc!: PDFDocument;
-  pageCount!: number;
-  formFields!: PDFField[];
-  onFieldMouseDown!: (field: FormField) => void;
+  private pdfDoc!: PDFDocument;
+  private pageCount!: number;
+  private formFields!: PDFField[];
+  private onFieldMouseDown!: (field: FormField) => void;
 
   constructor(
     container: HTMLElement,
@@ -39,13 +40,12 @@ export class Pdf {
 
     container.appendChild(canvas);
 
-    GlobalWorkerOptions.workerSrc =
-      "../../node_modules/pdfjs-dist/build/pdf.worker.min.mjs";
+    GlobalWorkerOptions.workerSrc = GLOBAL_WORKER_OPTIONS_SRC;
 
     this.initializePdf(file, container, canvas, context);
   }
 
-  async initializePdf(
+  private async initializePdf(
     file: File,
     container: HTMLElement,
     canvas: HTMLCanvasElement,
@@ -65,12 +65,12 @@ export class Pdf {
     );
   }
 
-  async parseFile(file: File): Promise<ArrayBuffer> {
+  private async parseFile(file: File): Promise<ArrayBuffer> {
     const pdfBytes: ArrayBuffer = await file.arrayBuffer();
     return pdfBytes;
   }
 
-  async parsePdf(pdfBytes: ArrayBuffer): Promise<PDFPage[]> {
+  private async parsePdf(pdfBytes: ArrayBuffer): Promise<PDFPage[]> {
     this.pdfDoc = await PDFDocument.load(pdfBytes);
     const pages: PDFPage[] = this.pdfDoc.getPages();
     this.pageCount = pages.length;
@@ -79,7 +79,9 @@ export class Pdf {
     return pages;
   }
 
-  async rasterizePdf(pdfBytes: ArrayBuffer): Promise<HTMLCanvasElement[]> {
+  private async rasterizePdf(
+    pdfBytes: ArrayBuffer
+  ): Promise<HTMLCanvasElement[]> {
     const pdfDocument: PDFDocumentProxy = await getDocument(pdfBytes).promise;
 
     const rasterizedPages = await Promise.all(
@@ -106,7 +108,7 @@ export class Pdf {
     return rasterizedPages;
   }
 
-  drawPages(
+  private drawPages(
     canvas: HTMLCanvasElement,
     context: CanvasRenderingContext2D,
     rasterizedPages: HTMLCanvasElement[]
@@ -129,7 +131,7 @@ export class Pdf {
     }, 0);
   }
 
-  addFormFieldComponents(
+  private addFormFieldComponents(
     container: HTMLElement,
     fields: PDFField[],
     rasterizedPages: HTMLCanvasElement[],
@@ -165,7 +167,7 @@ export class Pdf {
     });
   }
 
-  getPageNumberOfField(field: PDFField, pages: PDFPage[]): number {
+  private getPageNumberOfField(field: PDFField, pages: PDFPage[]): number {
     const fieldPage = this.pdfDoc.findPageForAnnotationRef(field.ref);
     const pageNumber = pages.reduce(
       (acc, page, index) => (fieldPage === page ? index : acc),
@@ -174,15 +176,9 @@ export class Pdf {
     return pageNumber;
   }
 
-  getFormField(index: number): PDFField {
-    return this.formFields[index];
-  }
-
-  getFormFieldCount(): number {
-    return this.formFields.length;
-  }
-
-  async fillDocument(connections: Set<Connection>): Promise<Uint8Array> {
+  private async fillDocument(
+    connections: Set<Connection>
+  ): Promise<Uint8Array> {
     connections.forEach((connection) => {
       if (connection.field.field instanceof PDFTextField) {
         (connection.field.field as PDFTextField).setText(
@@ -205,7 +201,15 @@ export class Pdf {
     return pdfBytes;
   }
 
-  async downloadDoc(connections: Set<Connection>): Promise<void> {
+  public getFormField(index: number): PDFField {
+    return this.formFields[index];
+  }
+
+  public getFormFieldCount(): number {
+    return this.formFields.length;
+  }
+
+  public async downloadDoc(connections: Set<Connection>): Promise<void> {
     const doc = await this.fillDocument(connections);
     download(doc, "pdf-tax-example.pdf", "application/pdf");
   }

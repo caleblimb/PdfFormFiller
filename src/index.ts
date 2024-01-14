@@ -3,6 +3,10 @@ import { Pdf } from "./pdf/Pdf";
 import { FileLoader, selectFile } from "./utilities/FileLoader";
 import { ConnectionHandler } from "./utilities/ConnectionHandler";
 
+const connectionHandler = new ConnectionHandler();
+let pdf: Pdf;
+let selectedIndex: { x: number; y: number } = { x: 0, y: 0 };
+
 const spreadsheetContainer: HTMLDivElement = document.getElementById(
   "spreadsheet-container"
 )! as HTMLDivElement;
@@ -15,27 +19,70 @@ const spreadsheetGenerateForm = document.getElementById(
   "spreadhseet-generate-form"
 )! as HTMLFormElement;
 
-const connectionHandler = new ConnectionHandler();
+document.getElementById("button-reset-spreadsheet")!.onclick = function () {
+  connectionHandler.clearConnections();
+  initSpreadsheetFileLoader();
+};
+
+document.getElementById("button-autofill-connections")!.onclick = function () {
+  connectionHandler.autoFillConnections(pdf, selectedIndex); //TODO: make dynamic based on selection
+};
+
+document.getElementById("button-save-connections")!.onclick = function () {
+  connectionHandler.saveConnections();
+};
+
+document.getElementById("button-load-connections")!.onclick =
+  async function () {
+    const file = await selectFile("application/json");
+    connectionHandler.loadConnections(file, pdf);
+  };
+
+document.getElementById("button-clear-connections")!.onclick = function () {
+  connectionHandler.clearConnections();
+};
+
+document.getElementById("button-reset-pdf")!.onclick = function () {
+  connectionHandler.clearConnections();
+  initPdfFileLoader();
+};
+
+document.getElementById("button-download")!.onclick = function () {
+  pdf.downloadDoc(connectionHandler.getConnections());
+};
 
 spreadsheetGenerateForm.addEventListener("submit", (e) => {
   e.preventDefault();
+  connectionHandler.clearConnections();
+
   const spreadhseetWidthInput: HTMLInputElement = document.getElementById(
     "spreadsheet-width-input"
   )! as HTMLInputElement;
+
   const spreadhseetHeightInput: HTMLInputElement = document.getElementById(
     "spreadsheet-height-input"
   )! as HTMLInputElement;
+
   new Spreadsheet(
     spreadsheetContainer,
-    [+spreadhseetWidthInput.value, +spreadhseetHeightInput.value],
+    {
+      width: +spreadhseetWidthInput.value,
+      height: +spreadhseetHeightInput.value,
+    },
     connectionHandler.liftCell,
     () => connectionHandler.redrawConnections(),
-    () => connectionHandler.focusConnection()
+    (index) => {
+      if (index !== null) {
+        selectedIndex = index;
+      }
+      connectionHandler.focusConnection();
+    }
   );
 });
 
 function initSpreadsheetFileLoader() {
   spreadsheetContainer.textContent = "";
+
   new FileLoader(
     spreadsheetContainer,
     (file) => {
@@ -44,7 +91,12 @@ function initSpreadsheetFileLoader() {
         file,
         connectionHandler.liftCell,
         () => connectionHandler.redrawConnections(),
-        () => connectionHandler.focusConnection()
+        (index) => {
+          if (index !== null) {
+            selectedIndex = index;
+          }
+          connectionHandler.focusConnection();
+        }
       );
     },
     "text/csv",
@@ -52,10 +104,9 @@ function initSpreadsheetFileLoader() {
   );
 }
 
-let pdf!: Pdf;
-
 function initPdfFileLoader() {
   pdfContainer.textContent = "";
+
   new FileLoader(
     pdfContainer,
     (file) => {
@@ -65,32 +116,6 @@ function initPdfFileLoader() {
     ".pdf"
   );
 }
-
-document.getElementById("button-reset-spreadsheet")!.onclick = function () {
-  connectionHandler.clearConnections();
-  initSpreadsheetFileLoader();
-};
-document.getElementById("button-autofill-connections")!.onclick = function () {
-  connectionHandler.autoFillConnections(pdf, { x: 4, y: 0 }); //TODO: make dynamic based on selection
-};
-document.getElementById("button-save-connections")!.onclick = function () {
-  connectionHandler.saveConnections();
-};
-document.getElementById("button-load-connections")!.onclick =
-  async function () {
-    const file = await selectFile("application/json");
-    connectionHandler.loadConnections(file, pdf);
-  };
-document.getElementById("button-clear-connections")!.onclick = function () {
-  connectionHandler.clearConnections();
-};
-document.getElementById("button-reset-pdf")!.onclick = function () {
-  connectionHandler.clearConnections();
-  initPdfFileLoader();
-};
-document.getElementById("button-download")!.onclick = function () {
-  pdf.downloadDoc(connectionHandler.connections);
-};
 
 initSpreadsheetFileLoader();
 initPdfFileLoader();

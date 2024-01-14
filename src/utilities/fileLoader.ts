@@ -1,14 +1,10 @@
 export class FileLoader {
-  elementContainer: HTMLElement;
-
   constructor(
     elementContainer: HTMLElement,
     onFileLoad: (file: File) => void,
     contentType: string,
     label: string
   ) {
-    this.elementContainer = elementContainer;
-
     const dropzoneElement: HTMLDivElement = document.createElement("div");
     dropzoneElement.className = "drop-zone";
 
@@ -21,7 +17,7 @@ export class FileLoader {
     dropzoneElement.appendChild(imgElement);
     dropzoneElement.appendChild(pElement);
 
-    this.elementContainer.appendChild(dropzoneElement);
+    elementContainer.appendChild(dropzoneElement);
 
     function processFile(file: File) {
       if (file.type === contentType) {
