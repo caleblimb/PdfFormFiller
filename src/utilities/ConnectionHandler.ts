@@ -1,4 +1,6 @@
+import download from "downloadjs";
 import { PDFField } from "pdf-lib";
+import { Pdf } from "../pdf/Pdf";
 
 const svgNS = "http://www.w3.org/2000/svg";
 
@@ -10,6 +12,12 @@ export interface FormField {
 export interface Connection {
   field: FormField;
   cell: HTMLElement;
+}
+
+interface SavedConnection {
+  dataX: string;
+  dataY: string;
+  dataI: string;
 }
 
 export class ConnectionHandler {
@@ -175,12 +183,64 @@ export class ConnectionHandler {
   }
 
   saveConnections() {
-    let json: any[] = [];
+    let data: SavedConnection[] = [];
     this.connections.forEach((connection) => {
-      const dataX = connection.cell.getAttribute("data-x");
-      const dataY = connection.cell.getAttribute("data-y");
-      // const fieldIndex = connection.field.field
-      json.push({ dataX, dataY });
+      const dataX = connection.cell.dataset.x;
+      const dataY = connection.cell.dataset.y;
+      const dataI = connection.field.container.dataset.i;
+      if (dataX && dataY && dataI) {
+        data.push({ dataX, dataY, dataI });
+      }
     });
+
+    const json = JSON.stringify(data);
+    console.log(json);
+
+    download(json, "connections.json", "application/json");
+  }
+
+  autoFillConnections(pdf: Pdf, position: { x: number; y: number }) {
+    const fieldCount: number = pdf.getFormFieldCount();
+    for (let i = 0; i < fieldCount; i++) {
+      this.parseConnection(
+        { dataX: `${position.x}`, dataY: `${position.y + i}`, dataI: `${i}` },
+        pdf
+      );
+    }
+  }
+
+  parseConnection(connection: SavedConnection, pdf: Pdf) {
+    const container: HTMLElement | null = document.querySelector(
+      `[data-i="${connection.dataI}"]`
+    );
+    const cell: HTMLElement | null = document.querySelector(
+      `[data-x="${connection.dataX}"][data-y="${connection.dataY}"]`
+    );
+    const field = pdf.getFormField(+connection.dataI);
+
+    console.log(container, field, cell);
+    if (container && field && cell) {
+      this.addConnection({
+        field: { container: container, field: field },
+        cell: cell,
+      });
+    }
+  }
+
+  loadConnections(file: File, pdf: Pdf) {
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        const json: string = event.target.result as string;
+        const data: SavedConnection[] = JSON.parse(json);
+
+        data.forEach((connection) => {
+          this.parseConnection(connection, pdf);
+        });
+      }
+    };
+
+    reader.readAsText(file);
   }
 }

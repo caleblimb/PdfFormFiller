@@ -1,11 +1,10 @@
 import jspreadsheet, { JspreadsheetInstance, Column } from "jspreadsheet-ce";
 
 export class Spreadsheet {
-  spreadsheet!: JspreadsheetInstance;
-  onCellMouseDown!: (Element: HTMLElement) => void;
-  onCellMouseUp!: (Element: HTMLElement) => void;
-  onStructureChange!: () => void;
-  onFocusChange!: () => void;
+  private spreadsheet!: JspreadsheetInstance;
+  private onCellMouseUp!: (Element: HTMLElement) => void;
+  private onStructureChange!: () => void;
+  private onFocusChange!: () => void;
 
   constructor(
     htmlElement: HTMLDivElement,
@@ -26,7 +25,7 @@ export class Spreadsheet {
     }
   }
 
-  generateTable(htmlElement: HTMLDivElement, dimensions: number[]) {
+  private generateTable(htmlElement: HTMLDivElement, dimensions: number[]) {
     let data: string[][] = [];
 
     let row: string[] = [];
@@ -46,7 +45,7 @@ export class Spreadsheet {
     this.createSpreadsheet(htmlElement, data, columns);
   }
 
-  async parseFile(htmlElement: HTMLDivElement, file: File) {
+  private async parseFile(htmlElement: HTMLDivElement, file: File) {
     const content: string = await file.text();
     const rows: string[] = content.split("\n");
     const data: string[][] = rows.map((row) => row.split(","));
@@ -57,7 +56,7 @@ export class Spreadsheet {
     this.createSpreadsheet(htmlElement, data, columns);
   }
 
-  createSpreadsheet(
+  private createSpreadsheet(
     element: HTMLDivElement,
     data: string[][],
     columns: jspreadsheet.Column[]
@@ -76,14 +75,14 @@ export class Spreadsheet {
       onresizecolumn: this.onStructureChange,
       onmoverow: this.onStructureChange,
       onmovecolumn: this.onStructureChange,
-      onselection: this.onFocusChange,
+      onselection: this.onFocusChange, //TODO save selection corners
       onblur: this.onFocusChange,
     });
 
     this.addEvents();
   }
 
-  addEvents() {
+  private addEvents() {
     const _this = this;
     const elements = document.querySelectorAll("[data-x][data-y]");
 

@@ -1,6 +1,6 @@
 import { Spreadsheet } from "./spreadsheet/Spreadsheet";
 import { Pdf } from "./pdf/Pdf";
-import { FileLoader } from "./utilities/FileLoader";
+import { FileLoader, selectFile } from "./utilities/FileLoader";
 import { ConnectionHandler } from "./utilities/ConnectionHandler";
 
 const spreadsheetContainer: HTMLDivElement = document.getElementById(
@@ -70,8 +70,17 @@ document.getElementById("button-reset-spreadsheet")!.onclick = function () {
   connectionHandler.clearConnections();
   initSpreadsheetFileLoader();
 };
-document.getElementById("button-autofill-connections")!.onclick =
-  function () {};
+document.getElementById("button-autofill-connections")!.onclick = function () {
+  connectionHandler.autoFillConnections(pdf, { x: 4, y: 0 }); //TODO: make dynamic based on selection
+};
+document.getElementById("button-save-connections")!.onclick = function () {
+  connectionHandler.saveConnections();
+};
+document.getElementById("button-load-connections")!.onclick =
+  async function () {
+    const file = await selectFile("application/json");
+    connectionHandler.loadConnections(file, pdf);
+  };
 document.getElementById("button-clear-connections")!.onclick = function () {
   connectionHandler.clearConnections();
 };

@@ -24,7 +24,6 @@ export class FileLoader {
     this.elementContainer.appendChild(dropzoneElement);
 
     function processFile(file: File) {
-      const fileName: string = file.name;
       if (file.type === contentType) {
         onFileLoad(file);
       }
@@ -53,25 +52,25 @@ export class FileLoader {
       ev.preventDefault();
     };
 
-    function selectFile(): Promise<File> {
-      return new Promise((resolve) => {
-        let input = document.createElement("input");
-        input.type = "file";
-        input.multiple = false;
-        input.accept = contentType;
-
-        input.onchange = () => {
-          let files = Array.from(input.files!);
-          resolve(files[0]);
-        };
-
-        input.click();
-      });
-    }
-
     dropzoneElement.onclick = async () => {
-      const file = await selectFile();
+      const file = await selectFile(contentType);
       processFile(file);
     };
   }
+}
+
+export function selectFile(contentType: string): Promise<File> {
+  return new Promise((resolve) => {
+    let input = document.createElement("input");
+    input.type = "file";
+    input.multiple = false;
+    input.accept = contentType;
+
+    input.onchange = () => {
+      let files = Array.from(input.files!);
+      resolve(files[0]);
+    };
+
+    input.click();
+  });
 }
