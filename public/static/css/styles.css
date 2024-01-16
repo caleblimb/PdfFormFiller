@@ -2,11 +2,24 @@ body {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   position: relative;
   margin: 0;
+  min-height: 100vh;
 }
 
 header,
 footer {
   text-align: center;
+  background-color: #bef4ff;
+}
+
+header hr,
+footer hr {
+  margin: 0;
+}
+
+footer p,
+header h1 {
+  margin: 0;
+  padding: 1rem;
 }
 
 .content {
@@ -14,10 +27,15 @@ footer {
   justify-content: space-evenly;
   text-align: center;
   overflow: hidden;
+  min-height: calc(100vh - 7.8rem);
 }
 
-.spreadsheet-input {
-  width: 4rem;
+.shadow-box {
+  display: flex;
+  box-shadow: 0 0 0.25rem gray;
+  height: fit-content;
+  margin: 1rem;
+  border-radius: 1px;
 }
 
 .drop-zone {
@@ -76,4 +94,37 @@ footer {
 
 .jcontextmenu > div:last-child {
   display: none;
+}
+
+.spreadsheet-input {
+  width: 3rem;
+}
+
+.action-button {
+  background-color: #bef4ff;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  box-shadow: 1px 1px 2px gray;
+}
+
+.action-button:hover {
+  background-color: #86ebff;
+}
+
+.action-button:active {
+  background-color: #30dcff;
+  box-shadow: 1px 1px 1px gray;
+}
+
+#spreadsheet-container > .jexcel_content > .jexcel > tbody > tr > td {
+  text-align: left !important;
+}
+
+#spreadhseet-generate-form {
+  display: inline-block;
+}
+
+.shadow-box .jexcel_content {
+  padding: 0.6rem 0.5rem 0.5rem 0.6rem;
 }

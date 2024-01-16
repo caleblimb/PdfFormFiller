@@ -2,6 +2,7 @@ import { Spreadsheet } from "./spreadsheet/Spreadsheet";
 import { Pdf } from "./pdf/Pdf";
 import { FileLoader, selectFile } from "./utilities/FileLoader";
 import { ConnectionHandler } from "./utilities/ConnectionHandler";
+import { ContextMenu } from "./utilities/ContextMenu";
 
 const connectionHandler = new ConnectionHandler();
 let pdf: Pdf;
@@ -22,24 +23,6 @@ const spreadsheetGenerateForm = document.getElementById(
 document.getElementById("button-reset-spreadsheet")!.onclick = function () {
   connectionHandler.clearConnections();
   initSpreadsheetFileLoader();
-};
-
-document.getElementById("button-autofill-connections")!.onclick = function () {
-  connectionHandler.autoFillConnections(pdf, selectedIndex); //TODO: make dynamic based on selection
-};
-
-document.getElementById("button-save-connections")!.onclick = function () {
-  connectionHandler.saveConnections();
-};
-
-document.getElementById("button-load-connections")!.onclick =
-  async function () {
-    const file = await selectFile("application/json");
-    connectionHandler.loadConnections(file, pdf);
-  };
-
-document.getElementById("button-clear-connections")!.onclick = function () {
-  connectionHandler.clearConnections();
 };
 
 document.getElementById("button-reset-pdf")!.onclick = function () {
@@ -104,6 +87,36 @@ function initSpreadsheetFileLoader() {
   );
 }
 
+function createPdfContextMenu() {
+  new ContextMenu(pdfContainer, [
+    {
+      text: "Load Connections",
+      action: async function () {
+        const file = await selectFile("application/json");
+        connectionHandler.loadConnections(file, pdf);
+      },
+    },
+    {
+      text: "Save Connections",
+      action: () => {
+        connectionHandler.saveConnections();
+      },
+    },
+    {
+      text: "Clear Connections",
+      action: () => {
+        connectionHandler.clearConnections();
+      },
+    },
+    {
+      text: "AutoFill Connections",
+      action: () => {
+        connectionHandler.autoFillConnections(pdf, selectedIndex);
+      },
+    },
+  ]);
+}
+
 function initPdfFileLoader() {
   pdfContainer.textContent = "";
 
@@ -111,6 +124,7 @@ function initPdfFileLoader() {
     pdfContainer,
     (file) => {
       pdf = new Pdf(pdfContainer, file, connectionHandler.selectField);
+      createPdfContextMenu();
     },
     "application/pdf",
     ".pdf"

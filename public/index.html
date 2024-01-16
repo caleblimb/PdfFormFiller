@@ -15,6 +15,7 @@
     <div id="connecting-line" class="connecting-line"></div>
     <header>
       <h1>PDF Form Filler</h1>
+      <hr />
     </header>
 
     <div id="content" class="content">
@@ -27,47 +28,41 @@
             type="number"
             min="1"
           />
-          X
+          <span>X</span>
           <input
             id="spreadsheet-height-input"
             class="spreadsheet-input"
             type="number"
             min="1"
           />
-          <button type="submit">Generate Blank</button>
+          <button class="action-button" type="submit">Generate Blank</button>
         </form>
-        <br />
-        <button id="button-reset-spreadsheet">Reset Spreadsheet</button>
-        <br />
-        <br />
-        <div id="spreadsheet-container"></div>
+        <span>|</span>
+        <button class="action-button" id="button-reset-spreadsheet">
+          Reset Spreadsheet
+        </button>
+        <div class="shadow-box">
+          <div id="spreadsheet-container"></div>
+        </div>
       </div>
 
       <div class="content-column">
         <h2>PDF Form</h2>
-        <button id="button-autofill-connections" type="button">
-          AutoFill Connections
+        <button class="action-button" id="button-reset-pdf" type="button">
+          Reset PDF
         </button>
-        <button id="button-save-connections" type="button">
-          Save Connections
+        <button class="action-button" id="button-download" type="button">
+          Download
         </button>
-        <button id="button-load-connections" type="button">
-          Load Connections
-        </button>
-        <button id="button-clear-connections" type="button">
-          Clear Connections
-        </button>
-        <br />
-        <br />
-        <button id="button-reset-pdf" type="button">Reset PDF</button>
-        <button id="button-download" type="button">Download</button>
-        <br />
-        <br />
-        <div id="pdf-container"></div>
+        <div class="shadow-box">
+          <div id="pdf-container"></div>
+        </div>
       </div>
     </div>
-
-    <footer><p>©2024 Caleb Limb</p></footer>
+    <footer>
+      <hr />
+      <p>©2024 Caleb Limb</p>
+    </footer>
 
     <script src="./static/bundle/script.js"></script>
   </body>

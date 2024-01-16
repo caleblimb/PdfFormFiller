@@ -67,6 +67,7 @@ export class Spreadsheet {
       csvHeaders: false,
       tableOverflow: false,
       columns: columns,
+      style: { textAlign: "left" },
 
       oninsertrow: this.onStructureChange,
       oninsertcolumn: this.onStructureChange,
@@ -84,7 +85,7 @@ export class Spreadsheet {
         _borderBottomIndex
       ) => {
         this.onFocusChange({ x: borderLeftIndex, y: borderTopIndex });
-      }, //TODO save selection corners
+      },
       onblur: () => {
         this.onFocusChange(null);
       },
