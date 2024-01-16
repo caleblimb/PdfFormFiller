@@ -1,3 +1,12 @@
-Run `npm install`
+# Spreadsheet to PDF form filler
 
-Run `npm start`
+This application grabs data from any spreadsheet and inputs it to any PDF Form.
+![application screenshot](application-screenshot.png)
+
+## Development environment
+
+Install **node js**
+
+Run `npm install` in console to setup dependencies
+
+Run `npm start` in console to start the application
