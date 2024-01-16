@@ -34,6 +34,9 @@ export class ConnectionHandler {
     window.addEventListener("mouseup", function (ev) {
       _this.mouseUp(ev);
     });
+    window.addEventListener("resize", function (ev) {
+      _this.redrawConnections();
+    });
   }
 
   private mouseMove(ev: MouseEvent) {
