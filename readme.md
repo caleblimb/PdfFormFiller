@@ -36,9 +36,9 @@ Right click on the PDF to open a context menu with various options to handle con
 
 Right click to open a context menu with basic functions. The form supports basic shpreadsheet functions. e.g. `=Sum(a1:b2)` `=a1+a2`
 
-### Checkboxes
+### CheckboxesW
 
-While text input simply coppies the data from the spreadsheet, checkboxes are checked based on if the cell they are connected to reads a `true`(checked) or `false`(unchecked). Add spreadsheet equations to evaluate if these boxes should be checked. e.g. `=a1>a2` `=b2=b3`
+While text input simply coppies the data from the spreadsheet, checkboxes are checked based on if the cell they are connected to reads a `true`(checked) or `false`(unchecked). You can write spreadsheet equations to evaluate if these boxes should be checked. e.g. `=a1>a2` `=b2=b3`
 
 ### Completing the Form
 
