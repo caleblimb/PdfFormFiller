@@ -83,7 +83,7 @@ function initSpreadsheetFileLoader() {
       );
     },
     "text/csv",
-    ".csv, .xlsx, .xls"
+    ".csv"
   );
 }
 
